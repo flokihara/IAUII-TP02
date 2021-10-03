@@ -8,82 +8,71 @@ output: html_document
 TRABAJO PRACTICO 02- SCRAPPING.
 
 
+---
+title: "IAUII-TP02 - Scraping"
+author: "flokihara"
+date: "3/10/2021"
+output: html_document
+---
+
+TRABAJO PRACTICO 02- SCRAPING.
+
+
 ```{r}
 library(tidyverse)
-library(tibble)
 library(rvest)
-library(stringr)
 ```
 
 
-#OBJETIVO: Conocer la población total de la Argentina según los últimos Censos Nacionales (Fuente: INDEC)
+#OBJETIVO: Obtener información actualizad de la cotización del dolar (en sus diversos tipos) (Fuente: Página web Cronista.com)
+(Dolar BNA , Dolar Blue, Dolar CCl, Dolar Solidario)
 
+A partir de la página del cronista.com crearemos una tabla que permita obtener los distintos valores de dolar del momento con su variación.
+
+```{r}
+url <- "https://www.cronista.com/MercadosOnline/dolar.html"
+```
+
+Usando Selector Gadget obtenemos los datos de la página que serán los que compongan nuestra tabla de cotizaciones
+
+```{r}
+Tipo_dolar <- read_html(url) %>%
+  html_nodes(xpath = '//*[(@id = "market-scrll-1")]//*[contains(concat( " ", @class, " " ), concat( " ", "name", " " ))]') %>%
+  html_text2()
+  
+```
+
+
+A partir de los datos de la página, obtendremos las variaciones porcentuales de cambio que se van generando en comparación con el día anterior
+
+```{r}
+ variacion <- read_html(url) %>% 
+  html_nodes(xpath = '//*[(@id = "market-scrll-1")]//*[contains(concat( " ", @class, " " ), concat( " ", "percentage", " " ))]') %>%
+  html_text()
+```
+
+```{r}
+head(variacion)
+```
+
+
+Obtendremos el valor del dolar al momento de actualización del presente archivo
+
+```{r}
+valor_dolar <- read_html(url) %>% 
+  html_nodes(xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "value", " " ))]') %>%
+  html_text()
+
+```
+
+
+Vinculamos los datos, armando una tabla (nuestro dataframe de trabajo)
+
+```{r}
+data_dolar <- tibble(Tipo_dolar = Tipo_dolar, variacion = variacion, valor = valor_dolar)
+```
 
 
 ```{r}
-fuente <- "https://www.indec.gob.ar/indec/web/Nivel3-Tema-2-41"
+head(data_dolar)
 ```
-
-
-```{r}
-CENSOS <- read_html(fuente)
-```
-
-```{r}
-
-```
-
-
-# Hemos Generado una lista con las especies de Guacamayo con la informacion extraida de Wikipedia
-
-Subespecies_00 <- Subespecies_00 %>% 
-  data.frame()
-
-
-#Queremos realizar una busqueda de palabras clave. Hacemos un experimemento con la pagina del
-#ARA ARARAUNA
-
-url_00 <- "https://es.wikipedia.org/wiki/Ara_ararauna"
-base_01 <- read_html(url_00)
-
-Datos <- base_01  %>% 
-  html_elements("div p") %>% 
-  html_text2() %>% 
-  data.frame()
-
-Peligro<- base_01  %>% 
-  html_elements("td a") %>% 
-  html_text2() %>% data.frame() %>% 
-  slice(4) 
-
-Subespecies_Peligro<- 
-  data.frame(Subespecie=c("Ara Arauna"), Estado= c("Preocupacion Menor"))
-
-#Podemos repetir esta operacion recopilando datos por medio del scrapeo y asi construir
-#nuestra tabla de especies en peligro.
-
-#extrajimos informacion de texto, ahora preguntamos si habitan en el Amazonas
-#Para ello, buscamos palabras que refieran a ese habitat.
-
-Ararauna_00 <- Datos %>% 
-  as.character(.) %>% 
-  str_detect( string = ., pattern = "Amazonia") 
-Ararauna_01 <- Datos %>% 
-  as.character(.) %>% 
-  str_detect( string = ., pattern = "Amazonas") 
-Ararauna_02 <- Datos %>% 
-  as.character(.) %>% 
-  str_detect( string = ., pattern = "Amazonica") 
-Ararauna_03 <- Datos %>% 
-  as.character(.) %>% 
-  str_detect( string = ., pattern = "Amazonicas")
-Ararauna_04 <- Datos %>% 
-  as.character(.) %>% 
-  str_detect( string = ., pattern = "Amazonicos")
-Ararauna_05 <- Datos %>% 
-  as.character(.) %>% 
-  str_detect( string = ., pattern = "Amazonico")
-
-
-#En el texto analizado no se detectaron referencias explicitas al Amazonas. Deberia incluirse.
-#Podemos utilizar str_detect para identificar paralabras claves, o realizar correcciones si estan faltan.
