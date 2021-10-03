@@ -1,0 +1,89 @@
+---
+title: "IAUII-TP02"
+author: "flokihara"
+date: "3/10/2021"
+output: html_document
+---
+
+TRABAJO PRACTICO 02- SCRAPPING.
+
+
+```{r}
+library(tidyverse)
+library(tibble)
+library(rvest)
+library(stringr)
+```
+
+
+#OBJETIVO: Conocer la población total de la Argentina según los últimos Censos Nacionales (Fuente: INDEC)
+
+
+
+```{r}
+fuente <- "https://www.indec.gob.ar/indec/web/Nivel3-Tema-2-41"
+```
+
+
+```{r}
+CENSOS <- read_html(fuente)
+```
+
+```{r}
+
+```
+
+
+# Hemos Generado una lista con las especies de Guacamayo con la informacion extraida de Wikipedia
+
+Subespecies_00 <- Subespecies_00 %>% 
+  data.frame()
+
+
+#Queremos realizar una busqueda de palabras clave. Hacemos un experimemento con la pagina del
+#ARA ARARAUNA
+
+url_00 <- "https://es.wikipedia.org/wiki/Ara_ararauna"
+base_01 <- read_html(url_00)
+
+Datos <- base_01  %>% 
+  html_elements("div p") %>% 
+  html_text2() %>% 
+  data.frame()
+
+Peligro<- base_01  %>% 
+  html_elements("td a") %>% 
+  html_text2() %>% data.frame() %>% 
+  slice(4) 
+
+Subespecies_Peligro<- 
+  data.frame(Subespecie=c("Ara Arauna"), Estado= c("Preocupacion Menor"))
+
+#Podemos repetir esta operacion recopilando datos por medio del scrapeo y asi construir
+#nuestra tabla de especies en peligro.
+
+#extrajimos informacion de texto, ahora preguntamos si habitan en el Amazonas
+#Para ello, buscamos palabras que refieran a ese habitat.
+
+Ararauna_00 <- Datos %>% 
+  as.character(.) %>% 
+  str_detect( string = ., pattern = "Amazonia") 
+Ararauna_01 <- Datos %>% 
+  as.character(.) %>% 
+  str_detect( string = ., pattern = "Amazonas") 
+Ararauna_02 <- Datos %>% 
+  as.character(.) %>% 
+  str_detect( string = ., pattern = "Amazonica") 
+Ararauna_03 <- Datos %>% 
+  as.character(.) %>% 
+  str_detect( string = ., pattern = "Amazonicas")
+Ararauna_04 <- Datos %>% 
+  as.character(.) %>% 
+  str_detect( string = ., pattern = "Amazonicos")
+Ararauna_05 <- Datos %>% 
+  as.character(.) %>% 
+  str_detect( string = ., pattern = "Amazonico")
+
+
+#En el texto analizado no se detectaron referencias explicitas al Amazonas. Deberia incluirse.
+#Podemos utilizar str_detect para identificar paralabras claves, o realizar correcciones si estan faltan.
